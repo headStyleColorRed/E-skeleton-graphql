@@ -13,5 +13,19 @@ module.exports = {
     } catch (error) {
       throw error
     }
+  },
+
+  createUser: async args => {
+    try {
+      const { email } = args.user
+      const user = new User({
+        email: email
+      })
+
+      const newUser = await user.save()
+      return { ... newUser._doc, _id: newUser.id }
+    } catch (error) {
+      throw error
+    }
   }
 }

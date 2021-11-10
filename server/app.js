@@ -31,7 +31,7 @@ app.listen(port, () => console.log("Listening port " + port))
 
 // JWT Authenticate
 function validateToken(req, res, next) {
-  if (environment == "production") { return next() }
+  if (environment != "production") { return next() }
 
   const token = req.headers["authorization"]
   if (!token)
@@ -63,7 +63,7 @@ const { graphqlHTTP } = require('express-graphql');
 const schema = require("./graphql/schema")
 const resolvers = require("./graphql/resolvers")
 
-app.use('/graphql', graphqlHTTP({
+app.use('/graphql', validateToken, graphqlHTTP({
   schema: schema,
   rootValue: resolvers,
   graphiql: true,
