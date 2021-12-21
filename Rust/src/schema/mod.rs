@@ -1,1 +1,1 @@
-pub mod graphql_schema;
+pub(crate) mod graphql_schema;

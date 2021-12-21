@@ -10,6 +10,7 @@ use juniper::http::graphiql::graphiql_source;
 use juniper::http::GraphQLRequest;
 mod schema;
 use schema::graphql_schema;
+use schema::graphql_schema::Schema;
 
 fn main() -> io::Result<()> {
     println!("Running server on port 8080");
@@ -18,9 +19,9 @@ fn main() -> io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .data(schema.clone())
-            .route("/", web::get().to(health))
-            .service(web::resource("graphql").route(web::post().to_async(graphql)))
-            .service(web::resource("playground").route(web::post().to_async(playground)))
+            .route("/health", web::get().to(health))
+            .service(web::resource("/graphql").route(web::post().to_async(graphql)))
+            .service(web::resource("/playground").route(web::get().to(playground)))
     })
     .bind("localhost:8080")?
     .run()
@@ -46,7 +47,7 @@ fn graphql(
     })
 }
 
-fn graphiql() -> HttpResponse {
+fn playground() -> HttpResponse {
     let html = graphiql_source("http://localhost:8080/graphql");
     HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
