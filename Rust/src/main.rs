@@ -1,49 +1,36 @@
 // Global crates
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate diesel_migrations;
 
-// Modules
-mod actors;
-mod db_utils;
-mod models;
-mod queries;
+use actix_web::{middleware, App, HttpServer};
+use std::{env, io};
+
+mod utils;
 mod schema;
 
-// Libary imports
-use actix::SyncArbiter;
-use actix_web::{App, HttpServer};
-use actors::db::DBActor;
-use db_utils::{get_pool, run_migrations};
-use dotenv::dotenv;
-use models::AppState;
-use queries::*;
-use std::env;
+#[actix_rt::main]
+async fn main() -> io::Result<()> {
+    logging_setup();
 
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    dotenv().ok();
-    let db_url =
-        env::var("DATABASE_URL").expect("Error retrieving the database url. Check your .env file");
-    run_migrations(&db_url);
-    let pool = get_pool(&db_url);
-    let db_addr = SyncArbiter::start(5, move || DBActor(pool.clone()));
+    // Instantiate a new connection pool
+    let pool = utils::db::get_pool();
 
+    // Start up the server, passing in (a) the connection pool
+    // to make it available to all endpoints and (b) the configuration
+    // function that adds the /graphql logic.
     HttpServer::new(move || {
         App::new()
-            .service(health)
-            .service(get_all)
-            .service(get_published)
-            .service(create_article)
-            .service(publish_article)
-            .service(update_article)
-            .service(delete_article)
-            .data(AppState {
-                db: db_addr.clone(),
-            })
+            .data(pool.clone())
+            .wrap(middleware::Logger::default())
+            .configure(utils::endpoints::graphql_endpoints)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind("127.0.0.1:8080")?
     .run()
     .await
+}
+
+// TODO: more fine-grained logging setup
+fn logging_setup() {
+    env::set_var("RUST_LOG", "actix_web=info");
+    env_logger::init();
 }
