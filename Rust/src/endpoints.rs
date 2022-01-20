@@ -9,6 +9,8 @@ use std::sync::Arc;
 
 // The configuration callback that enables us to add the /graphql route
 // to the actix-web server.
+// The schema is passed as anthread-safe reference-counting pointer to the different threads
+// and the we setup the routes.
 pub fn graphql_endpoints(config: &mut web::ServiceConfig) {
     let schema = Arc::new(create_schema());
     config
@@ -34,13 +36,13 @@ async fn graphql(
     data: web::Json<GraphQLRequest>,
 ) -> Result<HttpResponse, Error> {
     // Instantiate a context
-    let ctx = GraphQLContext {
+    let context = GraphQLContext {
         pool: pool.get_ref().to_owned(),
     };
 
     // Handle the incoming request and return a string result (or error)
     let res = web::block(move || {
-        let res = data.execute(&schema, &ctx);
+        let res = data.execute(&schema, &context);
         Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
     })
     .await
