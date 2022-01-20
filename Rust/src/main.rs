@@ -1,55 +1,49 @@
+// Global crates
 #[macro_use]
-extern crate juniper;
+extern crate diesel;
+#[macro_use]
+extern crate diesel_migrations;
 
-use std::io;
-use std::sync::Arc;
-
-use actix_web::{web, App, Error, HttpResponse, HttpServer, Responder};
-use futures::future::Future;
-use juniper::http::graphiql::graphiql_source;
-use juniper::http::GraphQLRequest;
+// Modules
+mod actors;
+mod db_utils;
+mod models;
+mod queries;
 mod schema;
-use schema::graphql_schema;
-use schema::graphql_schema::Schema;
 
-fn main() -> io::Result<()> {
-    println!("Running server on port 8080");
-    let schema = Arc::new(graphql_schema::create_schema());
+// Libary imports
+use actix::SyncArbiter;
+use actix_web::{App, HttpServer};
+use actors::db::DBActor;
+use db_utils::{get_pool, run_migrations};
+use dotenv::dotenv;
+use models::AppState;
+use queries::*;
+use std::env;
+
+#[actix_web::main]
+async fn main() -> std::io::Result<()> {
+    dotenv().ok();
+    let db_url =
+        env::var("DATABASE_URL").expect("Error retrieving the database url. Check your .env file");
+    run_migrations(&db_url);
+    let pool = get_pool(&db_url);
+    let db_addr = SyncArbiter::start(5, move || DBActor(pool.clone()));
 
     HttpServer::new(move || {
         App::new()
-            .data(schema.clone())
-            .route("/health", web::get().to(health))
-            .service(web::resource("/graphql").route(web::post().to_async(graphql)))
-            .service(web::resource("/playground").route(web::get().to(playground)))
+            .service(health)
+            .service(get_all)
+            .service(get_published)
+            .service(create_article)
+            .service(publish_article)
+            .service(update_article)
+            .service(delete_article)
+            .data(AppState {
+                db: db_addr.clone(),
+            })
     })
-    .bind("localhost:8080")?
+    .bind(("127.0.0.1", 8080))?
     .run()
-}
-
-fn health() -> impl Responder {
-    HttpResponse::Ok().body("Server is up and running")
-}
-
-fn graphql(
-    st: web::Data<Arc<Schema>>,
-    data: web::Json<GraphQLRequest>,
-) -> impl Future<Item = HttpResponse, Error = Error> {
-    web::block(move || {
-        let res = data.execute(&st, &());
-        Ok::<_, serde_json::error::Error>(serde_json::to_string(&res)?)
-    })
-    .map_err(Error::from)
-    .and_then(|user| {
-        Ok(HttpResponse::Ok()
-            .content_type("application/json")
-            .body(user))
-    })
-}
-
-fn playground() -> HttpResponse {
-    let html = graphiql_source("http://localhost:8080/graphql");
-    HttpResponse::Ok()
-        .content_type("text/html; charset=utf-8")
-        .body(html)
+    .await
 }
