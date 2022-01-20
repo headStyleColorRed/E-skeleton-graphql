@@ -1,7 +1,8 @@
 table! {
-    todos (id) {
+    articles (id) {
         id -> Int4,
-        task -> Varchar,
-        done -> Bool,
+        title -> Varchar,
+        body -> Text,
+        published -> Bool,
     }
 }

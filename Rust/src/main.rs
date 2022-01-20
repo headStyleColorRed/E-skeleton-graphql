@@ -11,6 +11,7 @@ mod endpoints;
 mod graphql;
 mod models;
 mod schema;
+mod utils;
 
 #[actix_rt::main]
 async fn main() -> io::Result<()> {
