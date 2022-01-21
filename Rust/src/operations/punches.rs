@@ -1,4 +1,4 @@
-
+use crate::context::GraphQLContext;
 use crate::models::punch::Punch;
 use crate::schema::punches;
 use crate::schema::punches::dsl::*;
@@ -13,19 +13,24 @@ pub struct Punches;
 
 // Punch queries
 impl Punches {
-    pub fn all_punches(conn: &PgConnection) -> FieldResult<Vec<Punch>> {
+    pub fn all_punches(context: &GraphQLContext) -> FieldResult<Vec<Punch>> {
         // Retrieve connection
+        let conn: &PgConnection = &context.pool.get().unwrap();
+        // Make query
         let res = punches.load::<Punch>(conn);
-        // Return query
+        // Parse result
         graphql_translate(res)
     }
 }
 
 // Punch mutations
 impl Punches {
-    pub fn create_punch(conn: &PgConnection, input: CreateUserInput) -> FieldResult<Punch> {
+    pub fn create_punch(context: &GraphQLContext, input: CreatePunchInput) -> FieldResult<Punch> {
         // Retrieve connection
+        let conn: &PgConnection = &context.pool.get().unwrap();
+        // Make query
         let res = diesel::insert_into(punches).values(&input).get_result(conn);
+        // Parse result
         graphql_translate(res)
     }
 }
@@ -33,7 +38,7 @@ impl Punches {
 // The GraphQL input object for creating TODOs
 #[derive(GraphQLInputObject, Insertable)]
 #[table_name = "punches"]
-pub struct CreateUserInput {
+pub struct CreatePunchInput {
     pub user_id: i32,
     pub entry: String,
     pub leave: String,

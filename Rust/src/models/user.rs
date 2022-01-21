@@ -1,7 +1,7 @@
 use super::punch::Punch;
 use crate::{context::GraphQLContext, operations::punches::Punches};
-use diesel::{Queryable, PgConnection};
-use juniper::{FieldResult};
+use diesel::Queryable;
+use juniper::FieldResult;
 // The core data type undergirding the GraphQL interface
 #[derive(Queryable)]
 pub struct User {
@@ -23,7 +23,6 @@ impl User {
     }
 
     pub fn history(context: &GraphQLContext) -> FieldResult<Vec<Punch>> {
-        let conn: &PgConnection = &context.pool.get().unwrap();
-        Punches::all_punches(conn)
+        Punches::all_punches(context)
     }
 }

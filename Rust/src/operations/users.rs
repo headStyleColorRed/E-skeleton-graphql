@@ -1,3 +1,4 @@
+use crate::context::GraphQLContext;
 use crate::models::user::User;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
@@ -12,19 +13,24 @@ pub struct Users;
 
 // User queries
 impl Users {
-    pub fn all_users(conn: &PgConnection) -> FieldResult<Vec<User>> {
+    pub fn all_users(context: &GraphQLContext) -> FieldResult<Vec<User>> {
         // Retrieve connection
+        let conn: &PgConnection = &context.pool.get().unwrap();
+        // Make query
         let res = users.load::<User>(conn);
-        // Return query
+        // Parse ressult
         graphql_translate(res)
     }
 }
 
 // User mutations
 impl Users {
-    pub fn create_user(conn: &PgConnection, input: CreateUserInput) -> FieldResult<User> {
+    pub fn create_user(context: &GraphQLContext, input: CreateUserInput) -> FieldResult<User> {
         // Retrieve connection
+        let conn: &PgConnection = &context.pool.get().unwrap();
+        // Make query
         let res = diesel::insert_into(users).values(&input).get_result(conn);
+        // Parse ressult
         graphql_translate(res)
     }
 }
