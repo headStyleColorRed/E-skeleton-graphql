@@ -1,12 +1,7 @@
 use super::punch::Punch;
-use crate::{context::GraphQLContext, utils::graphql_translate};
-use diesel::{Queryable, PgConnection, RunQueryDsl};
+use crate::{context::GraphQLContext, operations::punches::Punches};
+use diesel::{Queryable, PgConnection};
 use juniper::{FieldResult};
-use crate::schema::users::dsl::*;
-
-use crate::operations::punches::{Punches};
-use crate::schema::punches::dsl::*;
-
 // The core data type undergirding the GraphQL interface
 #[derive(Queryable)]
 pub struct User {
@@ -27,11 +22,8 @@ impl User {
         self.status
     }
 
-    pub fn all_users(context: &GraphQLContext) -> FieldResult<Vec<Punch>> {
+    pub fn history(context: &GraphQLContext) -> FieldResult<Vec<Punch>> {
         let conn: &PgConnection = &context.pool.get().unwrap();
-        // Retrieve connection
-        let res = punches.load::<Punch>(conn);
-        // Return query
-        graphql_translate(res)
+        Punches::all_punches(conn)
     }
 }

@@ -1,9 +1,3 @@
-
-use super::user::User;
-use crate::schema::punches;
-
-// The core data type undergirding the GraphQL interface
-
 #[derive(Queryable)]
 #[derive(juniper::GraphQLObject)]
 pub struct Punch {
