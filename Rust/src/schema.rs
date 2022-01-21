@@ -1,7 +1,7 @@
 table! {
     punches (id) {
         id -> Int4,
-        parent_id -> Int4,
+        user_id -> Int4,
         entry -> Varchar,
         leave -> Varchar,
         created_at -> Varchar,
@@ -16,7 +16,7 @@ table! {
     }
 }
 
-joinable!(punches -> users (parent_id));
+joinable!(punches -> users (user_id));
 
 allow_tables_to_appear_in_same_query!(
     punches,

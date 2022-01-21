@@ -7,9 +7,9 @@ CREATE TABLE users (
 
 CREATE TABLE punches (
     id SERIAL PRIMARY KEY,
-    parent_id INT NOT NULL,
+    user_id INT NOT NULL,
     entry VARCHAR NOT NULL,
     leave VARCHAR NOT NULL,
     created_at VARCHAR NOT NULL,
-    FOREIGN KEY (parent_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
