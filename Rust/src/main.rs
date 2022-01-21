@@ -5,7 +5,7 @@ extern crate diesel;
 use actix_web::{middleware, App, HttpServer};
 use std::{env, io};
 mod db;
-mod data;
+mod operations;
 mod context;
 mod endpoints;
 mod graphql;

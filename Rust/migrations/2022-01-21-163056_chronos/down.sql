@@ -1,2 +1,3 @@
 -- This file should undo anything in `up.sql`
-DROP TABLE articles
+DROP TABLE punches;
+DROP TABLE users;

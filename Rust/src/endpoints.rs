@@ -1,7 +1,7 @@
 use super::context::GraphQLContext;
 use super::db::PostgresPool;
-use super::graphql::create_schema;
-use super::graphql::Schema;
+use crate::graphql::base::create_schema;
+use crate::graphql::base::Schema;
 use actix_web::{web, Error, HttpResponse};
 use juniper::http::playground::playground_source;
 use juniper::http::GraphQLRequest;

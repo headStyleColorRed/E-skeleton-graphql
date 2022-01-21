@@ -4,9 +4,8 @@ use diesel::Queryable;
 // The core data type undergirding the GraphQL interface
 #[derive(Queryable)]
 #[derive(juniper::GraphQLObject)]
-pub struct Article {
+pub struct User {
     pub id: i32,
-    pub title: String,
-    pub body: String,
-    pub published: bool,
+    pub name: String,
+    pub status: i32,
 }
