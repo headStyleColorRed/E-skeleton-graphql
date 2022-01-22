@@ -8,6 +8,7 @@ pub struct User {
     pub id: i32,
     pub name: String,
     pub status: i32,
+    pub current_punch: Option<i32>,
 }
 
 #[juniper::object(Context = GraphQLContext)]
@@ -23,6 +24,6 @@ impl User {
     }
 
     pub fn history(context: &GraphQLContext) -> FieldResult<Vec<Punch>> {
-        Punches::all_punches(context)
+        Punches::all_punches_for_user(context, self.id)
     }
 }

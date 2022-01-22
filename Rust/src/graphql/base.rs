@@ -1,10 +1,10 @@
-use juniper::RootNode;
 use crate::context::GraphQLContext;
+use crate::models::punch::{Punch, CreatePunchClockInInput, CreatePunchClockOutInput};
 use crate::models::user::User;
+use crate::operations::punches::Punches;
 use crate::operations::users::{CreateUserInput, Users};
 use juniper::FieldResult;
-use crate::models::punch::Punch;
-use crate::operations::punches::{Punches, CreatePunchInput};
+use juniper::RootNode;
 
 // The root GraphQL query
 pub struct Query;
@@ -20,16 +20,11 @@ pub fn create_schema() -> Schema {
     Schema::new(Query, Mutation)
 }
 
-
 // Queries
 #[juniper::object(Context = GraphQLContext)]
 impl Query {
     pub fn all_users(context: &GraphQLContext) -> FieldResult<Vec<User>> {
         Users::all_users(context)
-    }
-
-    pub fn all_punches(context: &GraphQLContext) -> FieldResult<Vec<Punch>> {
-        Punches::all_punches(context)
     }
 }
 
@@ -39,8 +34,18 @@ impl Mutation {
     pub fn create_user(context: &GraphQLContext, input: CreateUserInput) -> FieldResult<User> {
         Users::create_user(context, input)
     }
-    
-    pub fn create_punch(context: &GraphQLContext, input: CreatePunchInput) -> FieldResult<Punch> {
-        Punches::create_punch(context, input)
+
+    pub fn clock_in(
+        context: &GraphQLContext,
+        input: CreatePunchClockInInput,
+    ) -> FieldResult<Punch> {
+        Punches::clock_in(context, input)
+    }
+
+    pub fn clock_out(
+        context: &GraphQLContext,
+        input: CreatePunchClockOutInput,
+    ) -> FieldResult<Punch> {
+        Punches::clock_out(context, input)
     }
 }

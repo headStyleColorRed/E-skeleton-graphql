@@ -3,8 +3,8 @@ table! {
         id -> Int4,
         user_id -> Int4,
         entry -> Varchar,
-        leave -> Varchar,
-        created_at -> Varchar,
+        leave -> Nullable<Varchar>,
+        status -> Int4,
     }
 }
 
@@ -13,6 +13,7 @@ table! {
         id -> Int4,
         name -> Varchar,
         status -> Int4,
+        current_punch -> Nullable<Int4>,
     }
 }
 
